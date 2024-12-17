@@ -1,0 +1,28 @@
+# Node.js
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+/pnpm-lock.yaml
+/package-lock.json
+
+# Environment Variables
+.env
+
+# IDE and OS specific files
+/.vscode/
+/.DS_Store
+
+# Uploads directory (if it contains uploaded files)
+uploads/
+
+# Logs
+/logs
+*.log
+
+# Build directories
+/dist
+/build
+
+# Ignore temporary files
+*.tmp
+*.swp
