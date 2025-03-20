@@ -68,10 +68,12 @@ const app = express();
 
 // Middleware setup
 app.use(cors({
-  origin: '*', // Allow all origins during development
+  origin: ['https://main.d129psxc1ttzi.amplifyapp.com'], // Specify your frontend domain
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'token'],
+  credentials: true // Enable credentials (cookies, authorization headers)
 }));
+
 
 app.use(express.json());
 
