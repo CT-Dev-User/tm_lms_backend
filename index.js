@@ -1,12 +1,63 @@
+// import express from 'express';
+// import dotenv from "dotenv";
+// import { conn } from './database/db.js';
+// import cors from 'cors';
+// import Razorpay from 'razorpay';
+
+
+
+// dotenv.config();
+// export const instance = new Razorpay({
+//   key_id: process.env.RAZORPAY_KEY_ID,
+//   key_secret: process.env.RAZORPAY_KEY_SECRET,
+// });
+
+// // Initialize Express app
+// const app = express();
+// //using middlewares
+
+// app.use(cors({
+//   origin: '*',  // This will allow all origins during development
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'token'], // Include 'token' for isAuth
+// }));
+
+// app.use(express.json());
+// const PORT = process.env.PORT;
+
+//  conn();
+
+// app.get("/" , (req,res)=>{
+//     res.send("server is working")
+// })
+
+// app.use("/uploads",express.static("uploads"))
+
+// //importing routes
+// import userRoutes from './routes/user.js'
+// import courseRoutes from './routes/course.js'
+// import adminRoutes from './routes/admin.js'
+
+// //using routes
+// app.use("/api" ,userRoutes);
+// app.use("/api" ,courseRoutes)
+// app.use("/api" ,adminRoutes)
+
+
+// app.listen(3000,()=>{
+//   console.log(`server running @ http://localhost:3000`)
+// })
+
 import express from 'express';
 import dotenv from "dotenv";
 import { conn } from './database/db.js';
 import cors from 'cors';
 import Razorpay from 'razorpay';
 
-
-
+// Load environment variables
 dotenv.config();
+
+// Initialize Razorpay instance
 export const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -14,36 +65,36 @@ export const instance = new Razorpay({
 
 // Initialize Express app
 const app = express();
-//using middlewares
 
+// Middleware setup
 app.use(cors({
-  origin: '*',  // This will allow all origins during development
+  origin: '*', // Allow all origins during development
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'token'], // Include 'token' for isAuth
+  allowedHeaders: ['Content-Type', 'Authorization', 'token'],
 }));
 
 app.use(express.json());
-const PORT = process.env.PORT;
 
- conn();
+// Database connection
+conn();
 
-app.get("/" , (req,res)=>{
-    res.send("server is working")
-})
+// Test route
+app.get("/", (req, res) => {
+  res.send("Server is working");
+});
 
-app.use("/uploads",express.static("uploads"))
+// Serve static files (uploads)
+app.use("/uploads", express.static("uploads"));
 
-//importing routes
-import userRoutes from './routes/user.js'
-import courseRoutes from './routes/course.js'
-import adminRoutes from './routes/admin.js'
+// Import routes
+import userRoutes from './routes/user.js';
+import courseRoutes from './routes/course.js';
+import adminRoutes from './routes/admin.js';
 
-//using routes
-app.use("/api" ,userRoutes);
-app.use("/api" ,courseRoutes)
-app.use("/api" ,adminRoutes)
+// Use routes
+app.use("/api", userRoutes);
+app.use("/api", courseRoutes);
+app.use("/api", adminRoutes);
 
-
-app.listen(3000,()=>{
-  console.log(`server running @ http://localhost:3000`)
-})
+// Export app for Vercel compatibility
+export default app;
