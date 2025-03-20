@@ -21,26 +21,45 @@ const schema = new mongoose.Schema(
         },
         subscription: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Course",
+            ref: "Courses",
+        }],
+        // Fields for password reset
+        resetPasswordToken: {
+            type: String,
+            default: null
         },
-        ],
+        resetPasswordExpires: {
+            type: Date,
+            default: null
+        },firstName: {
+            type: String,
+            default: "",
+        },
+        lastName: {
+            type: String,
+            default: "",
+        },
+        profileImage: {
+            type: String,
+            default: null,
+        },
+        profileComplete: {
+            type: Boolean,
+            default: false
+        }
     }, 
     {
     timestamps: true
     }
 );
 
-
-
-schema.methods.generatetoken = function () {
+schema.methods.generateToken = function () {
     try {
-      let usertoken = jwt.sign({ _id: this._id }, secretkey);
-      return usertoken;
+      let userToken = jwt.sign({ _id: this._id }, process.env.Jwt_Sec);
+      return userToken;
     } catch (error) {
       console.log(error);
     } 
-  };
+};
 
-
-
-export const User = mongoose.model("User", schema)
+export const User = mongoose.model("User", schema);

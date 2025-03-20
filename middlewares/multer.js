@@ -18,20 +18,22 @@
 // export const uploadFiles = multer({storage}).single("file");
 
 
-import multer from "multer";
-import { v4 as uuidv4 } from "uuid";
-import path from "path";
+import multer from 'multer'
+import {v4 as uuid} from 'uuid'
 
-// Set up the storage configuration
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/"); // Ensure the "uploads" folder exists
+    destination:  (req,file,cb) =>{
+        cb(null,"uploads")
     },
-    filename: (req, file, cb) => {
-        const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
-        cb(null, uniqueName);
+    filename(req,file,cb){
+        const id = uuid()
+
+        const extName = file.originalname.split(".").pop();
+        const fileName = `${id}.${extName}`;
+
+        cb(null,fileName);
     },
-});
+})
 
 // Define the file filter to allow both image and video files
 const fileFilter = (req, file, cb) => {
