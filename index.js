@@ -1,63 +1,22 @@
-// import express from 'express';
-// import dotenv from "dotenv";
-// import { conn } from './database/db.js';
-// import cors from 'cors';
-// import Razorpay from 'razorpay';
-
-
-
-// dotenv.config();
-// export const instance = new Razorpay({
-//   key_id: process.env.RAZORPAY_KEY_ID,
-//   key_secret: process.env.RAZORPAY_KEY_SECRET,
-// });
-
-// // Initialize Express app
-// const app = express();
-// //using middlewares
-
-// app.use(cors({
-//   origin: '*',  // This will allow all origins during development
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization', 'token'], // Include 'token' for isAuth
-// }));
-
-// app.use(express.json());
-// const PORT = process.env.PORT;
-
-//  conn();
-
-// app.get("/" , (req,res)=>{
-//     res.send("server is working")
-// })
-
-// app.use("/uploads",express.static("uploads"))
-
-// //importing routes
-// import userRoutes from './routes/user.js'
-// import courseRoutes from './routes/course.js'
-// import adminRoutes from './routes/admin.js'
-
-// //using routes
-// app.use("/api" ,userRoutes);
-// app.use("/api" ,courseRoutes)
-// app.use("/api" ,adminRoutes)
-
-
-// app.listen(3000,()=>{
-//   console.log(`server running @ http://localhost:3000`)
-// })
-
+// index.js
 import express from 'express';
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 import { conn } from './database/db.js';
 import cors from 'cors';
 import Razorpay from 'razorpay';
+import { v2 as cloudinary } from 'cloudinary';
 
 // Load environment variables
 dotenv.config();
 
-// Initialize Razorpay instance
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME ,
+  api_key: process.env.CLOUDINARY_API_KEY ,
+  api_secret: process.env.CLOUDINARY_API_SECRET ,
+});
+
+// Razorpay instance
 export const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -66,37 +25,40 @@ export const instance = new Razorpay({
 // Initialize Express app
 const app = express();
 
-// Middleware setup
+// Middlewares
 app.use(cors({
   origin: ['https://main.d129psxc1ttzi.amplifyapp.com'], // Specify your frontend domain
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'token'],
   credentials: true // Enable credentials (cookies, authorization headers)
 }));
-
-
 app.use(express.json());
+
 
 // Database connection
 conn();
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("Server is working");
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.send('Server is working');
 });
 
-// Serve static files (uploads)
-app.use("/uploads", express.static("uploads"));
+// Serve static files (optional, remove if fully using Cloudinary)
+app.use('/uploads', express.static('uploads'));
 
-// Import routes
+// Routes
 import userRoutes from './routes/user.js';
 import courseRoutes from './routes/course.js';
 import adminRoutes from './routes/admin.js';
 
-// Use routes
-app.use("/api", userRoutes);
-app.use("/api", courseRoutes);
-app.use("/api", adminRoutes);
+app.use('/api', userRoutes);
+app.use('/api', courseRoutes);
+app.use('/api', adminRoutes);
 
-// Export app for Vercel compatibility
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.stack);
+  res.status(500).json({ message: 'Internal Server Error', error: err.message });
+});
+
 export default app;
