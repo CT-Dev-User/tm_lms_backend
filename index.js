@@ -62,14 +62,12 @@
 // });
 
 // export default app;
-
 import express from 'express';
 import dotenv from 'dotenv';
 import { conn } from './database/db.js';
 import cors from 'cors';
 import Razorpay from 'razorpay';
 import { v2 as cloudinary } from 'cloudinary';
-import serverless from 'serverless-http';
 
 // Load environment variables
 dotenv.config();
@@ -119,7 +117,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
-// Database connection (Vercel does not support long-running processes)
+// Database connection
 conn();
 
-export default serverless(app);
+// Export Express app for Vercel
+export default app;
