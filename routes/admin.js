@@ -1,4 +1,3 @@
-// routes/admin.js
 import express from 'express';
 import {
   addLectures,
@@ -16,13 +15,12 @@ import {
   deleteMeeting,
 } from '../controller/meeting.js';
 import { isAdmin, isAuth } from '../middlewares/isAuth.js';
-import { uploadFiles } from '../middlewares/multer.js';
 
 const router = express.Router();
 
 // Course management
-router.post('/course/new', isAuth, isAdmin, uploadFiles, createCourse);
-router.post('/course/:id', isAuth, isAdmin, uploadFiles, addLectures);
+router.post('/course/new', isAuth, isAdmin, createCourse);
+router.post('/course/:id', isAuth, isAdmin, addLectures);
 router.delete('/course/:id', isAuth, isAdmin, deleteCourse);
 router.delete('/lecture/:id', isAuth, isAdmin, deleteLecture);
 

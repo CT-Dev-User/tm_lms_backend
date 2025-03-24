@@ -3,25 +3,49 @@ import { Courses } from '../models/courses.js';
 import { Lecture } from '../models/lectures.js';
 import { User } from '../models/user.js';
 import { TryCatch } from '../middlewares/TryCatch.js';
+import formidable from 'formidable';
+import { Readable } from 'stream';
 import fs from 'fs';
 
-export const createCourse = TryCatch(async (req, res) => {
-  const { title, description, price, duration, category, createdBy } = req.body;
+const uploadToCloudinary = (buffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    });
+    Readable.from(buffer).pipe(stream);
+  });
+};
 
-  if (!req.file) {
+const parseForm = (req) =>
+  new Promise((resolve, reject) => {
+    const form = formidable({ multiples: false });
+    form.parse(req, (err, fields, files) => {
+      if (err) return reject(err);
+      console.log('Parsed fields:', fields);
+      console.log('Parsed files:', files);
+      resolve({ fields, files });
+    });
+  });
+
+export const createCourse = TryCatch(async (req, res) => {
+  const { fields, files } = await parseForm(req);
+
+  // Handle array structure from formidable v3
+  const { title, description, price, duration, category, createdBy } = Object.fromEntries(
+    Object.entries(fields).map(([key, value]) => [key, value[0]])
+  );
+  const imageFile = files.file?.[0]; // Access first file in array
+
+  if (!imageFile || !imageFile.size) {
     return res.status(400).json({ message: 'Please upload an image' });
   }
 
-  const result = await cloudinary.uploader.upload(req.file.path, {
+  const buffer = fs.readFileSync(imageFile.filepath);
+  const result = await uploadToCloudinary(buffer, {
     folder: 'courses',
     resource_type: 'image',
   });
-
-  try {
-    fs.unlinkSync(req.file.path);
-  } catch (err) {
-    console.error('Failed to delete temp file:', err);
-  }
 
   const course = await Courses.create({
     title,
@@ -45,21 +69,23 @@ export const addLectures = TryCatch(async (req, res) => {
     return res.status(404).json({ message: 'Course not found' });
   }
 
-  const { title, description } = req.body;
-  if (!req.file) {
+  const { fields, files } = await parseForm(req);
+
+  // Handle array structure from formidable v3
+  const { title, description } = Object.fromEntries(
+    Object.entries(fields).map(([key, value]) => [key, value[0]])
+  );
+  const videoFile = files.file?.[0]; // Access first file in array
+
+  if (!videoFile || !videoFile.size) {
     return res.status(400).json({ message: 'Please upload a video' });
   }
 
-  const result = await cloudinary.uploader.upload(req.file.path, {
+  const buffer = fs.readFileSync(videoFile.filepath);
+  const result = await uploadToCloudinary(buffer, {
     folder: 'lectures',
     resource_type: 'video',
   });
-
-  try {
-    fs.unlinkSync(req.file.path);
-  } catch (err) {
-    console.error('Failed to delete temp file:', err);
-  }
 
   const lecture = await Lecture.create({
     title,
@@ -82,7 +108,7 @@ export const deleteCourse = TryCatch(async (req, res) => {
 
   await Lecture.deleteMany({ course: course._id });
   const publicId = course.image.split('/').pop().split('.')[0];
-  await cloudinary.uploader.destroy(`courses/${publicId}`);
+  await cloudinary.uploader.destroy(`courses/${publicId}`, { resource_type: 'image' });
 
   await course.deleteOne();
   res.status(200).json({ message: 'Course deleted successfully' });
@@ -106,24 +132,13 @@ export const getAllStats = TryCatch(async (req, res) => {
   const totalLectures = await Lecture.countDocuments();
   const totalUsers = await User.countDocuments();
 
-  const stats = {
-    totalCourses,
-    totalLectures,
-    totalUsers,
-  };
-
-  res.status(200).json({
-    success: true,
-    stats,
-  });
+  const stats = { totalCourses, totalLectures, totalUsers };
+  res.status(200).json({ success: true, stats });
 });
 
 export const getAllUser = TryCatch(async (req, res) => {
   const users = await User.find().select('-password -resetPasswordToken -resetPasswordExpires');
-  res.status(200).json({
-    success: true,
-    users,
-  });
+  res.status(200).json({ success: true, users });
 });
 
 export const updateRole = TryCatch(async (req, res) => {
