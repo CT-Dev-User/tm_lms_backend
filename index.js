@@ -1,4 +1,4 @@
-// // index.js
+
 // import express from 'express';
 // import dotenv from 'dotenv';
 // import { conn } from './database/db.js';
@@ -11,9 +11,9 @@
 
 // // Configure Cloudinary
 // cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME ,
-//   api_key: process.env.CLOUDINARY_API_KEY ,
-//   api_secret: process.env.CLOUDINARY_API_SECRET ,
+//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+//   api_key: process.env.CLOUDINARY_API_KEY,
+//   api_secret: process.env.CLOUDINARY_API_SECRET,
 // });
 
 // // Razorpay instance
@@ -27,24 +27,17 @@
 
 // // Middlewares
 // app.use(cors({
-//   origin: ['https://main.d129psxc1ttzi.amplifyapp.com'], // Specify your frontend domain
+//   origin: process.env.NODE_ENV === 'production' ? 'https://main.d129psxc1ttzi.amplifyapp.com' : '*',
 //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 //   allowedHeaders: ['Content-Type', 'Authorization', 'token'],
-//   credentials: true // Enable credentials (cookies, authorization headers)
 // }));
-// app.use(express.json());
-
-
-// // Database connection
-// conn();
+// app.use(express.json({ limit: '10mb' }));
+// app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // // Health check endpoint
 // app.get('/', (req, res) => {
 //   res.send('Server is working');
 // });
-
-// // Serve static files (optional, remove if fully using Cloudinary)
-// app.use('/uploads', express.static('uploads'));
 
 // // Routes
 // import userRoutes from './routes/user.js';
@@ -61,16 +54,27 @@
 //   res.status(500).json({ message: 'Internal Server Error', error: err.message });
 // });
 
+// // Database connection
+// conn();
+
+// // Export Express app for Vercel
 // export default app;
+
+
+
+
 import express from 'express';
 import dotenv from 'dotenv';
-import { conn } from './database/db.js';
 import cors from 'cors';
 import Razorpay from 'razorpay';
 import { v2 as cloudinary } from 'cloudinary';
+import { conn } from './database/db.js';
 
 // Load environment variables
 dotenv.config();
+
+// Initialize Express app
+const app = express();
 
 // Configure Cloudinary
 cloudinary.config({
@@ -85,15 +89,26 @@ export const instance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// Initialize Express app
-const app = express();
+// Allowed CORS origins
+const allowedOrigins = [
+  'https://main.d129psxc1ttzi.amplifyapp.com',
+  'https://www.lms.techmomentum.in'
+];
 
 // Middlewares
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 'https://main.d129psxc1ttzi.amplifyapp.com' : '*',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy violation'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'token'],
+  credentials: true,
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
@@ -111,7 +126,12 @@ app.use('/api', userRoutes);
 app.use('/api', courseRoutes);
 app.use('/api', adminRoutes);
 
-// Error handling middleware
+// Handle 404 errors for undefined routes
+app.use((req, res, next) => {
+  res.status(404).json({ message: 'Route Not Found' });
+});
+
+// Global error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server error:', err.stack);
   res.status(500).json({ message: 'Internal Server Error', error: err.message });
