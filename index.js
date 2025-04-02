@@ -121,10 +121,12 @@ app.get('/', (req, res) => {
 import userRoutes from './routes/user.js';
 import courseRoutes from './routes/course.js';
 import adminRoutes from './routes/admin.js';
+import instructorRoutes from './routes/instructor.js'
 
 app.use('/api', userRoutes);
 app.use('/api', courseRoutes);
 app.use('/api', adminRoutes);
+app.use("/api",instructorRoutes)
 
 // Handle 404 errors for undefined routes
 app.use((req, res, next) => {
