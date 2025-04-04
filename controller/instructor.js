@@ -1,5 +1,5 @@
-import Payout from '../models/instructor.js';
 import mongoose from "mongoose";
+import Payout from '../models/instructor.js';
 // Update the getPayoutSummary function to handle both 'processed' and 'approved' statuses
 export const getPayoutSummary = async (req, res) => {
   try {
@@ -102,3 +102,4 @@ export const deleteWithdrawalRequest = async (req, res) => {
         res.status(500).json({ message: "Server error, please try again" });
     }
 };
+

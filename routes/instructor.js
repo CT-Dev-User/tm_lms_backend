@@ -1,5 +1,4 @@
 import express from 'express';
-import mongoose from "mongoose";
 import { deleteWithdrawalRequest, getPayoutHistory, getPayoutSummary, requestWithdrawal } from '../controller/instructor.js';
 import { isAuth } from '../middlewares/isAuth.js';
 
@@ -11,4 +10,3 @@ router.get('/history', isAuth, getPayoutHistory);
 router.delete('/request/:id', isAuth, deleteWithdrawalRequest);
 
 export default router;
-//routes/instructor.js

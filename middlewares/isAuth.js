@@ -1,4 +1,5 @@
-import jwt from 'jsonwebtoken'
+// middlewares/isAuth.js
+import jwt from 'jsonwebtoken';
 import { User } from '../models/user.js';
 
 export const isAuth = async (req, res, next) => {
@@ -6,45 +7,43 @@ export const isAuth = async (req, res, next) => {
         const token = req.headers.token;
         if (!token) 
             return res.status(403).json({
-          message: "Please Login"
-        });
+                message: "Please Login"
+            });
 
-        const decodedData = jwt.verify(token,process.env.Jwt_Sec);
+        const decodedData = jwt.verify(token, process.env.Jwt_Sec);
         req.user = await User.findById(decodedData._id);
 
-        next()
-    }
-    catch (error) {
+        next();
+    } catch (error) {
         res.status(500).json({
             message: "Login First"
-        })
+        });
     }
-}
-
-// export const isAdmin = (req,res,next) =>{
-//     try{
-//         if(res.user.role !== "admin")
-//            return res.status(403).json({
-//           message : "you are not admin",
-//         });
-//         next();   
-//     }catch(error){
-//         res.status(500).json({
-//             message:error.message,
-//         })
-//     }
-// }
+};
 
 export const isAdmin = (req, res, next) => {
     try {
-        // Check if the authenticated user has the role 'admin'
         if (!req.user || req.user.role !== "admin") {
             return res.status(403).json({
                 message: "You are not an admin",
             });
         }
+        next();
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
+};
 
-        next(); // Proceed to the next middleware or route
+export const isInstructorOrAdmin = (req, res, next) => {
+    try {
+        if (!req.user || (req.user.role !== "admin" && req.user.role !== "instructor")) {
+            return res.status(403).json({
+                message: "You are not authorized (admin or instructor required)",
+            });
+        }
+        next();
     } catch (error) {
         res.status(500).json({
             message: error.message,
