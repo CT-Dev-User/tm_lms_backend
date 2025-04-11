@@ -177,29 +177,35 @@ export const instance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// Initialize Express app
-const app = express();
-const PORT = process.env.PORT || 3000;
 
-// CORS configuration
+
+// ✅ Apply CORS middleware early
 const allowedOrigins = [
-  'https://lms.techmomentum.in',
-  'https://www.lms.techmomentum.in',
-  'http://localhost:3000'
+  "https://lms.techmomentum.in",
+  "https://www.lms.techmomentum.in",
+  "http://localhost:3000"
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
+    console.log("Origin =>", origin); // Add this for debugging
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'token'],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "token"]
 }));
+
+
+// Initialize Express app
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+
 
 // Body parsers
 app.use(express.json({ limit: '10mb' }));
