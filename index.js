@@ -149,7 +149,6 @@
 // export const handler = serverless(app);
 
 
-
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -182,16 +181,31 @@ export const instance = new Razorpay({
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware setup
+// CORS configuration
+const allowedOrigins = [
+  'https://lms.techmomentum.in',
+  'https://www.lms.techmomentum.in',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'token'],
 }));
+
+// Body parsers
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// Static files route
+// Serve static files if any
 app.use('/uploads', express.static('uploads'));
 
 // Health check
@@ -199,7 +213,7 @@ app.get('/', (req, res) => {
   res.send('Server is working');
 });
 
-// API Routes
+// API routes
 app.use('/api', userRoutes);
 app.use('/api', courseRoutes);
 app.use('/api', adminRoutes);
@@ -210,7 +224,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
-// Start server (non-serverless mode)
+// Start server in non-serverless mode
 const startServer = async () => {
   try {
     await conn();
@@ -224,16 +238,16 @@ const startServer = async () => {
   }
 };
 
-// Run if not in serverless mode
+// Conditional server start
 if (process.env.RUN_MODE !== 'serverless') {
   startServer();
 } else {
-  // Connect to DB once on cold start for serverless
+  // Cold start DB connection for serverless
   conn().then(() => console.log('DB connected (serverless mode)')).catch(err => {
     console.error('DB connection error (serverless):', err);
   });
 }
 
-// Export handler for Serverless
+// Export for serverless deployment
 export const handler = serverless(app);
 
