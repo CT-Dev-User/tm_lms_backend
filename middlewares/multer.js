@@ -1,7 +1,18 @@
+// middlewares/multer.js
 import multer from 'multer';
+import { v4 as uuid } from 'uuid';
 
-// Memory storage configuration
-const storage = multer.memoryStorage();
+// Temporary storage configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const id = uuid();
+    const extName = file.originalname.split('.').pop();
+    cb(null, `${id}.${extName}`);
+  },
+});
 
 // File filter for images and videos
 const fileFilter = (req, file, cb) => {

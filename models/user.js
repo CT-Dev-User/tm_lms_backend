@@ -18,7 +18,6 @@ const schema = new mongoose.Schema(
         role: {
             type: String,
             default: "user",
-            enum: ["user", "admin", "instructor"] // Optional: restricts values
         },
         subscription: [{
             type: mongoose.Schema.Types.ObjectId,

@@ -1,14 +1,26 @@
+// routes/course.js
 import express from 'express';
-import { checkout, fetchLecture, fetchLectures, getAllCourses, getMyCourses, getSingleCourse, paymentVerification } from '../controller/course.js';
+import {
+  checkout,
+  fetchLecture,
+  fetchLectures,
+  getAllCourses,
+  getMyCourses,
+  getSingleCourse,
+  paymentVerification,
+} from '../controller/course.js';
 import { isAuth } from '../middlewares/isAuth.js';
 
 const router = express.Router();
 
+// Public routes
 router.get('/course/all', getAllCourses);
 router.get('/course/:id', getSingleCourse);
+
+// Protected routes (require authentication)
 router.get('/lectures/:id', isAuth, fetchLectures);
 router.get('/lecture/:id', isAuth, fetchLecture);
-router.get('/mycourse', isAuth, getMyCourses);
+router.get('/mycourse', isAuth, getMyCourses); // Duplicated, keeping only one
 router.post('/course/checkout/:id', isAuth, checkout);
 router.post('/verification/:id', isAuth, paymentVerification);
 
