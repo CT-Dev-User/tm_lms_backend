@@ -131,10 +131,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
+// Replace your current CORS configuration with this:
 app.use(cors({
-  origin: '*', // Allow all origins for development
+  origin: ['https://www.lms.techmomentum.in', 'https://lms.techmomentum.in', 'http://localhost:3000'],
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'token'],
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 }));
 app.use(express.json());
 
