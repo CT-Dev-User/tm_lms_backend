@@ -83,10 +83,33 @@ export const loginUser = TryCatch(async (req, res) => {
     { expiresIn: "15d" }
   );
 
+  // Optional: Set token as HttpOnly cookie
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // Secure in production
+    sameSite: 'strict',
+    maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+  });
+
   res.status(200).json({
     message: `Welcome back ${user.name}`,
-    token,
+    token, // Keep token in response for localStorage
     user,
+  });
+});
+
+// User logout
+export const logout = TryCatch(async (req, res) => {
+  // Clear the cookie (if using cookies)
+  res.cookie('token', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    expires: new Date(0), // Expire immediately
+  });
+
+  res.status(200).json({
+    message: "Logged out successfully",
   });
 });
 
